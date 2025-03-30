@@ -1,8 +1,5 @@
 const std = @import("std");
-// TODO: update build.zig  to be able to find this header file without
-// needing to provide an absolute path
-// https://ziggit.dev/t/how-to-set-cimport-file-path/384
-const c = @cImport(@cInclude("/home/user/code/learn_zig/zig_raylib/raylib/zig-out/include/raylib.h"));
+const c = @cImport(@cInclude("raylib.h"));
 pub fn main() void {
     const width = 800;
     const height = 450;

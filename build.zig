@@ -15,6 +15,12 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
 
+    // raylib dependency
+    const dep_raylib = b.dependency("raylib", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
     // We will also create a module for our other entry point, 'main.zig'.
     const exe_mod = b.createModule(.{
         // `root_source_file` is the Zig "entry point" of the module. If a module
@@ -33,24 +39,11 @@ pub fn build(b: *std.Build) void {
         .root_module = exe_mod,
     });
 
-    const dep_raylib = b.dependency("raylib", .{
-        .target = target,
-        .optimize = optimize,
-    });
-    exe.installHeadersDirectory(dep_raylib.path(""), "", .{
-        .include_extensions = &.{ "zig-out/include/raylib.h", "zig-out/include/raymath.h", "zig-out/include/rlgl.h" },
-    });
-
+    // add raylib static library
     exe.addObjectFile(dep_raylib.path("zig-out/lib/libraylib.a"));
-    // exe.linkSystemLibrary("GLX");
-    // exe.linkSystemLibrary("X11");
-    // exe.linkSystemLibrary("Xcursor");
-    // exe.linkSystemLibrary("Xext");
-    // exe.linkSystemLibrary("Xfixes");
-    // exe.linkSystemLibrary("Xi");
-    // exe.linkSystemLibrary("Xinerama");
-    // exe.linkSystemLibrary("Xrandr");
-    // exe.linkSystemLibrary("Xrender");
+    // add raylib headers
+    exe.addIncludePath(dep_raylib.path("zig-out/include"));
+    // raylib depends on libc
     exe.linkLibC();
 
     // This declares intent for the executable to be installed into the
@@ -92,4 +85,5 @@ pub fn build(b: *std.Build) void {
     // running the unit tests.
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_exe_unit_tests.step);
+    // std.debug.print("exe.installed_headers: {}", .{exe.installed_headers});
 }
