@@ -1,6 +1,9 @@
 const std = @import("std");
 const c = @cImport(@cInclude("raylib.h"));
 pub fn main() !void {
+    // TODO: make window dynamically sized
+    // TODO: Listen for kill program keyboard shortcut
+    // TODO: play video using ffmpeg
     const width = 800;
     const height = 450;
     const fps = 60;
@@ -14,7 +17,6 @@ pub fn main() !void {
 
     c.InitWindow(width, height, "drop files");
     c.SetTargetFPS(fps);
-    // std.ArrayList(comptime T: type)
     while (!c.WindowShouldClose()) {
         // UPDATE
         // ---
@@ -24,7 +26,6 @@ pub fn main() !void {
 
             for (0..droppedFiles.count) |i| {
                 const x = try allocator.dupeZ(u8, std.mem.span(droppedFiles.paths[i]));
-                // const x = try allocator.dupeZ();
                 try list.append(x);
             }
         }
