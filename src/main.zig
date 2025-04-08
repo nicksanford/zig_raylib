@@ -25,6 +25,9 @@ pub fn main() !void {
     while (!c.WindowShouldClose()) {
         // UPDATE
         // ---
+        if (c.IsKeyPressed(c.KEY_Q) and (c.IsKeyDown(c.KEY_LEFT_CONTROL) or c.IsKeyDown(c.KEY_RIGHT_CONTROL) or c.IsKeyDown(c.KEY_LEFT_SUPER) or c.IsKeyDown(c.KEY_RIGHT_SUPER))) {
+            break;
+        }
         if (c.IsFileDropped()) {
             const droppedFiles = c.LoadDroppedFiles();
             defer c.UnloadDroppedFiles(droppedFiles);
