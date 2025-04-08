@@ -10,10 +10,15 @@ pub fn main() !void {
 
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
-    defer std.debug.assert(gpa.deinit() == .ok);
+    defer std.debug.assert(gpa.deinit() == std.heap.Check.ok);
 
     var list = std.ArrayList([]u8).init(allocator);
     defer list.deinit();
+    defer {
+        for (list.items) |value| {
+            allocator.free(value);
+        }
+    }
 
     c.InitWindow(width, height, "drop files");
     c.SetTargetFPS(fps);
@@ -25,7 +30,7 @@ pub fn main() !void {
             defer c.UnloadDroppedFiles(droppedFiles);
 
             for (0..droppedFiles.count) |i| {
-                const x = try allocator.dupeZ(u8, std.mem.span(droppedFiles.paths[i]));
+                const x = try allocator.dupe(u8, std.mem.span(droppedFiles.paths[i]));
                 try list.append(x);
             }
         }
