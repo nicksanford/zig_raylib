@@ -48,8 +48,7 @@ pub fn main() !void {
         // DRAW
         // ---
         c.BeginDrawing();
-        c.ClearBackground(c.GetColor(c.BACKGROUND_COLOR));
-
+        c.ClearBackground(c.RAYWHITE);
         if (file_name) |f| {
             c.DrawText("Dropped files:", 100, 40, 20, c.DARKGRAY);
             c.DrawRectangle(0, 85, width, height, c.Fade(c.LIGHTGRAY, 0.5));
@@ -60,7 +59,7 @@ pub fn main() !void {
                 file_name = null;
             }
 
-            if (c.GuiButton(c.Rectangle{ .x = width / 2 - 150, .y = 300, .width = 100, .height = 50 }, "Cancel") != 0) {
+            if (c.GuiButton(c.Rectangle{ .x = width / 2 + 150, .y = 300, .width = 100, .height = 50 }, "Cancel") != 0) {
                 allocator.free(f);
                 file_name = null;
             }
