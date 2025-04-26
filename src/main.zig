@@ -25,6 +25,7 @@ pub fn main() !void {
             allocator.free(f);
         }
     }
+
     while (!c.WindowShouldClose()) {
         // UPDATE
         // ---
@@ -48,7 +49,7 @@ pub fn main() !void {
         // DRAW
         // ---
         c.BeginDrawing();
-        c.ClearBackground(c.RAYWHITE);
+        c.ClearBackground(c.GetColor(@as(c_uint, @bitCast(c.GuiGetStyle(c.DEFAULT, c.BACKGROUND_COLOR)))));
         if (file_name) |f| {
             c.DrawText("Dropped files:", 100, 40, 20, c.DARKGRAY);
             c.DrawRectangle(0, 85, width, height, c.Fade(c.LIGHTGRAY, 0.5));
