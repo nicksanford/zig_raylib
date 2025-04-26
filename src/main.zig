@@ -1,5 +1,10 @@
 const std = @import("std");
-const c = @cImport(@cInclude("raylib.h"));
+const c = @cImport({
+    @cInclude("raylib.h");
+    @cDefine("RAYGUI_IMPLEMENTATION", {});
+    @cInclude("raygui.h");
+});
+
 pub fn main() !void {
     // TODO: make window dynamically sized
     // TODO: Listen for kill program keyboard shortcut
@@ -12,16 +17,14 @@ pub fn main() !void {
     const allocator = gpa.allocator();
     defer std.debug.assert(gpa.deinit() == std.heap.Check.ok);
 
-    var list = std.ArrayList([]u8).init(allocator);
-    defer list.deinit();
+    c.InitWindow(width, height, "Whisper");
+    c.SetTargetFPS(fps);
+    var file_name: ?[]u8 = null;
     defer {
-        for (list.items) |value| {
-            allocator.free(value);
+        if (file_name) |f| {
+            allocator.free(f);
         }
     }
-
-    c.InitWindow(width, height, "drop files");
-    c.SetTargetFPS(fps);
     while (!c.WindowShouldClose()) {
         // UPDATE
         // ---
@@ -32,9 +35,12 @@ pub fn main() !void {
             const droppedFiles = c.LoadDroppedFiles();
             defer c.UnloadDroppedFiles(droppedFiles);
 
-            for (0..droppedFiles.count) |i| {
-                const x = try allocator.dupe(u8, std.mem.span(droppedFiles.paths[i]));
-                try list.append(x);
+            if (droppedFiles.count == 1) {
+                if (file_name) |f| {
+                    allocator.free(f);
+                    file_name = null;
+                }
+                file_name = try allocator.dupe(u8, std.mem.span(droppedFiles.paths[0]));
             }
         }
         // ---
@@ -42,18 +48,24 @@ pub fn main() !void {
         // DRAW
         // ---
         c.BeginDrawing();
+        c.ClearBackground(c.GetColor(c.BACKGROUND_COLOR));
 
-        c.ClearBackground(c.RAYWHITE);
-        if (list.items.len == 0) {
-            c.DrawText("Drop files into the window!!!", 100, 40, 20, c.DARKGRAY);
-        } else {
+        if (file_name) |f| {
             c.DrawText("Dropped files:", 100, 40, 20, c.DARKGRAY);
-            for (0.., list.items) |i, file| {
-                const fademod: f32 = if (i % 2 == 0) 0.5 else 0.3;
-                c.DrawRectangle(0, @as(c_int, @intCast(85 + 40 * i)), width, height, c.Fade(c.LIGHTGRAY, fademod));
-                c.DrawText(file.ptr, 120, @as(c_int, @intCast(100 + 40 * i)), 10, c.GRAY);
+            c.DrawRectangle(0, 85, width, height, c.Fade(c.LIGHTGRAY, 0.5));
+            c.DrawText(f.ptr, 120, 100, 10, c.GRAY);
+
+            if (c.GuiButton(c.Rectangle{ .x = width / 2 - 250, .y = 300, .width = 100, .height = 50 }, "Run") != 0) {
+                allocator.free(f);
+                file_name = null;
             }
-            c.DrawText("Drop new files...", 100, @as(c_int, @intCast(110 + 40 * list.items.len)), 20, c.DARKGRAY);
+
+            if (c.GuiButton(c.Rectangle{ .x = width / 2 - 150, .y = 300, .width = 100, .height = 50 }, "Cancel") != 0) {
+                allocator.free(f);
+                file_name = null;
+            }
+        } else {
+            c.DrawText("Please only drop a single file in the window", 100, 40, 20, c.DARKGRAY);
         }
 
         c.EndDrawing();

@@ -21,6 +21,11 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const dep_raygui = b.dependency("raygui", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
     // We will also create a module for our other entry point, 'main.zig'.
     const exe_mod = b.createModule(.{
         // `root_source_file` is the Zig "entry point" of the module. If a module
@@ -43,6 +48,7 @@ pub fn build(b: *std.Build) void {
     exe.addObjectFile(dep_raylib.path("zig-out/lib/libraylib.a"));
     // add raylib headers
     exe.addIncludePath(dep_raylib.path("zig-out/include"));
+    exe.addIncludePath(dep_raygui.path("src"));
     // raylib depends on libc
     exe.linkLibC();
 
