@@ -26,6 +26,7 @@ pub fn main() !void {
         }
     }
 
+    c.GuiLoadStyle("./raygui/styles/cherry/style_cherry.txt.rgs");
     while (!c.WindowShouldClose()) {
         // UPDATE
         // ---
